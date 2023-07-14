@@ -42,34 +42,41 @@ pub fn execute(
 
 pub mod execute {
 
-    use cosmwasm_std::WasmMsg;
-
+    //use cosmwasm_std::WasmMsg;
 
     use super::*;
 
     pub fn pong(deps: DepsMut) -> StdResult<Response> {
 
-        let state = STATE.load(deps.storage)?;
+        // let state = STATE.load(deps.storage)?;
 
-        let ping_contract = state.ping_contract;
+        // let ping_contract = state.ping_contract;
 
-        let _ping_response = WasmMsg::Execute {
-            contract_addr: ping_contract.to_string(),
-            msg: to_binary("Pong replied")?,
-            funds: vec![],
-        };
+        // let ping_response = WasmMsg::Execute {
+        //     contract_addr: ping_contract.to_string(),
+        //     msg: to_binary("F#ck, yeah it does!!")?,
+        //     funds: vec![],
+        // };
 
         println!("Pong contract recieved the conn request");
+
+        // assert!(pong_response == state.ping_count);
+
+        // if let Ok(Some(_)) == pong_response {
+        //     todo!()
+        //     // if response != 
+        //     // return Err(StdError::generic_err("Invalid pong response"))
+        // }
+        // else  {
+        //     return Err(StdError::generic_err("No pong response"))
+        // }
         
         STATE.update(deps.storage, |mut state| -> StdResult<_> {
             state.pong_count += 1;
             Ok(state)
         })?;
 
-        Ok(Response::new()
-            .add_attribute("action", "increment")
-            .set_data(b"the result data")
-        )
+        Ok(Response::new().add_attribute("action", "increment"))
     }
 
     pub fn set_ping_contract(deps: DepsMut, ping_contract: Addr) -> StdResult<Response>{
