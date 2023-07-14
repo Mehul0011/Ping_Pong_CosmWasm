@@ -65,6 +65,10 @@ pub mod execute {
         
         println!("We got the shit back, {:?}", pong_response);
 
+        STATE.update(deps.storage, |mut state| -> StdResult<_> {
+            state.ping_count += 1;
+            Ok(state)
+        })?;
 
         Ok(Response::new()
             .add_submessage(SubMsg { id: 1u64, msg: pong_response, gas_limit: None, reply_on: ReplyOn::Always })
@@ -111,7 +115,7 @@ pub mod execute {
 pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> StdResult<Response> {
     match msg.id {
         0u64 => reply::instantiate_reply(deps, env, msg),
-        1u64 => reply::pong_reply(deps, env, msg),
+        // 1u64 => reply::pong_reply(deps, env, msg),
         _ => Ok(Response::default()),
     }
 }
@@ -132,7 +136,7 @@ pub mod reply {
         Ok(Response::default())
     }
     
-    pub fn pong_reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
+    pub fn pong_reply(_deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
         // parse the reply data so we can get the contract address
 
         let res = parse_reply_execute_data(msg)
@@ -140,11 +144,9 @@ pub mod reply {
 
         println!("Pong reply has been called {:?}", res);
 
-        let mut state = STATE.load(deps.storage)?;
-        state.ping_count += 1;
-        println!("Ping count is now {:?}", state.ping_count);
-        assert_eq!(state.ping_count, 1u64);
-        STATE.save(deps.storage, &state)?;
+        // let pong_contract_address = deps.api.addr_validate(&res.contract_address)?;
+        // execute::set_pong_contract(deps, pong_contract_address)?;
+
         Ok(Response::default())
     }
 }
