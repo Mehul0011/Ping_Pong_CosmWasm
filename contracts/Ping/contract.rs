@@ -4,7 +4,8 @@ use cosmwasm_std::{to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Res
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, GetPingCountResponse, InstantiateMsg, QueryMsg};
 use crate::state::{State, ADMIN, STATE};
-use cw0::parse_reply_instantiate_data;
+use cosmwasm_std::{CosmosMsg, WasmMsg, SubMsg};
+use cw0::*;
 
 // version info for migration info
 const _CONTRACT_NAME: &str = "crates.io:ping-pong";
@@ -49,9 +50,6 @@ pub fn execute(
 }
 
 pub mod execute {
-
-    use cosmwasm_std::{CosmosMsg, WasmMsg, SubMsg};
-
     use super::*;
 
     pub fn ping(deps: DepsMut) -> StdResult<Response> {
@@ -59,10 +57,10 @@ pub mod execute {
 
         let pong_contract = state.pong_contract;
 
-        let pong_response: CosmosMsg<StdResult<Response>> = CosmosMsg::Wasm(WasmMsg::Execute {
+        let pong_response: CosmosMsg<cosmwasm_std::Empty> = CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: pong_contract.to_string(),
-            msg: to_binary(&pong::msg::ExecuteMsg::Pong{})?,
             funds: vec![],
+            msg: to_binary(&pong::msg::ExecuteMsg::Pong{}).unwrap(),
         });
         
         println!("We got the shit back, {:?}", pong_response);
@@ -72,7 +70,9 @@ pub mod execute {
             Ok(state)
         })?;
 
-        Ok(Response::new().add_attribute("action", "increment"))
+        Ok(Response::new()
+            .add_submessage(SubMsg { id: 1u64, msg: pong_response, gas_limit: None, reply_on: ReplyOn::Always })
+            .add_attribute("action", "increment"))
     }
 
     pub fn deploy_pong_contract(_deps: DepsMut, pong_code_id: u64, env: Env) -> StdResult<Response> {
@@ -90,18 +90,10 @@ pub mod execute {
 
         
         Ok(Response::new()
-        .add_submessage(make_sub(instantiate_pong_msg, ReplyOn::Always, 0u64))
+        .add_submessage(SubMsg { id: 0u64, msg: instantiate_pong_msg, gas_limit: None, reply_on: ReplyOn::Always })
         .add_attribute("action", "new_contract"))
     }
 
-    fn make_sub(msg: CosmosMsg, reply: ReplyOn, id: u64) -> SubMsg {
-        SubMsg {
-            id,
-            msg,
-            gas_limit: None,
-            reply_on: reply,
-        }
-    }
     
     pub fn set_pong_contract(deps: DepsMut, pong_contract: Addr) -> StdResult<Response> {
         let state = STATE.load(deps.storage).unwrap();
@@ -120,18 +112,43 @@ pub mod execute {
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
-    // parse the reply data so we can get the contract address
+pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> StdResult<Response> {
+    match msg.id {
+        0u64 => reply::instantiate_reply(deps, env, msg),
+        // 1u64 => reply::pong_reply(deps, env, msg),
+        _ => Ok(Response::default()),
+    }
+}
 
-    let res = parse_reply_instantiate_data(msg)
-    .map_err(|e| ContractError::ParseReplyError(e.to_string())).unwrap();
+pub mod reply {
+    use super::*;
 
-    println!("reply has been called, {:?}", res.contract_address);
+    pub fn instantiate_reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
+        // parse the reply data so we can get the contract address
+        let res = parse_reply_instantiate_data(msg)
+        .map_err(|e| ContractError::ParseReplyError(e.to_string())).unwrap();
 
-    let pong_contract_address = deps.api.addr_validate(&res.contract_address)?;
-    execute::set_pong_contract(deps, pong_contract_address)?;
+        println!("reply has been called, {:?}", res.contract_address);
 
-    Ok(Response::default())
+        let pong_contract_address = deps.api.addr_validate(&res.contract_address)?;
+        execute::set_pong_contract(deps, pong_contract_address)?;
+
+        Ok(Response::default())
+    }
+    
+    pub fn pong_reply(_deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
+        // parse the reply data so we can get the contract address
+
+        let res = parse_reply_execute_data(msg)
+        .map_err(|e| ContractError::ParseReplyError(e.to_string())).unwrap();
+
+        println!("Pong reply has been called {:?}", res);
+
+        // let pong_contract_address = deps.api.addr_validate(&res.contract_address)?;
+        // execute::set_pong_contract(deps, pong_contract_address)?;
+
+        Ok(Response::default())
+    }
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]

@@ -4,7 +4,7 @@ use cosmwasm_std::{to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Res
 use cw2::set_contract_version;
 
 use crate::msg::{ExecuteMsg, GetPongCountResponse, InstantiateMsg, QueryMsg};
-use crate::state::{State, STATE};
+use crate::state::{State, STATE};   
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:ping-pong";
@@ -23,7 +23,7 @@ pub fn instantiate(
     };
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
     STATE.save(deps.storage, &state)?;
-
+    println!("Pong contract instantiated");
     Ok(Response::new())
 }
 
