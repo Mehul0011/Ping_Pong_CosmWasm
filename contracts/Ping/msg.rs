@@ -9,6 +9,7 @@ pub struct InstantiateMsg {
 #[cw_serde]
 pub enum ExecuteMsg {
     Ping {},
+    DeployPongContract { pong_code_id: u64 },
     SetPongContract { pong_contract: Addr },
 }
 

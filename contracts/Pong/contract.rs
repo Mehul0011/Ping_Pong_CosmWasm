@@ -58,7 +58,7 @@ pub mod execute {
             funds: vec![],
         };
 
-        print!("We caught your shit, take it back {:?}th time", ping_response);
+        println!("Pong contract recieved the conn request {:?}th time", ping_response);
 
         // assert!(pong_response == state.ping_count);
 
