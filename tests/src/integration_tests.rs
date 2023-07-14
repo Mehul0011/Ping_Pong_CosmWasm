@@ -16,7 +16,8 @@ fn ping_contract() -> Box<dyn Contract<Empty>> {
         ping::contract::execute,
         ping::contract::instantiate,
         ping::contract::query,
-    );
+    )
+    .with_reply(ping::contract::reply);
     // .with_migrate(ping::contract::migrate);
     Box::new(contract)
 }
@@ -28,7 +29,7 @@ fn pong_contract() -> Box<dyn Contract<Empty>> {
         pong::contract::instantiate,
         pong::contract::query,
     );
-    // .with_reply(pong::contract::reply);
+    //.with_reply(pong::contract::reply);
     Box::new(contract)
 }
 
@@ -77,10 +78,9 @@ fn integration_test() {
     ).unwrap();
 
 
-    let instantiation_event = res.events[res.events.len() - 1].clone();
-    println!("Instantiated code id {} to address {}",
-        instantiation_event.attributes[1].value,
-        instantiation_event.attributes[0].value
+    let instantiation_event = res;
+    println!("Instantiated code id {:?} ",
+        instantiation_event
     );
     // let pong_contract_addr = router
     //     .instantiate_contract(

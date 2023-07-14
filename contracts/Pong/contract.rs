@@ -42,23 +42,23 @@ pub fn execute(
 
 pub mod execute {
 
-    use cosmwasm_std::WasmMsg;
+    //use cosmwasm_std::WasmMsg;
 
     use super::*;
 
     pub fn pong(deps: DepsMut) -> StdResult<Response> {
 
-        let state = STATE.load(deps.storage)?;
+        // let state = STATE.load(deps.storage)?;
 
-        let ping_contract = state.ping_contract;
+        // let ping_contract = state.ping_contract;
 
-        let ping_response = WasmMsg::Execute {
-            contract_addr: ping_contract.to_string(),
-            msg: to_binary("F#ck, yeah it does!!")?,
-            funds: vec![],
-        };
+        // let ping_response = WasmMsg::Execute {
+        //     contract_addr: ping_contract.to_string(),
+        //     msg: to_binary("F#ck, yeah it does!!")?,
+        //     funds: vec![],
+        // };
 
-        println!("Pong contract recieved the conn request {:?}th time", ping_response);
+        println!("Pong contract recieved the conn request");
 
         // assert!(pong_response == state.ping_count);
 

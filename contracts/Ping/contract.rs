@@ -4,6 +4,7 @@ use cosmwasm_std::{to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Res
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, GetPingCountResponse, InstantiateMsg, QueryMsg};
 use crate::state::{State, ADMIN, STATE};
+use cw0::parse_reply_instantiate_data;
 
 // version info for migration info
 const _CONTRACT_NAME: &str = "crates.io:ping-pong";
@@ -111,15 +112,12 @@ pub mod execute {
         };
 
         // print in debug mode
-        println!("Welcome the shitter");
+        println!("Welcome the pong shitter");
 
         STATE.save(deps.storage, &pong_state)?;
         Ok(Response::new())
     }
 }
-
-
-use cw0::parse_reply_instantiate_data;
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
@@ -132,10 +130,6 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> StdResult<Response> {
 
     let pong_contract_address = deps.api.addr_validate(&res.contract_address)?;
     execute::set_pong_contract(deps, pong_contract_address)?;
-    // add the contract address to the list of children in state
-    // let _state = STATE.load(deps.storage)?;
-    // state.children.push(child_contract.to_string());
-    // STATE.save(deps.storage, &state)?;
 
     Ok(Response::default())
 }
