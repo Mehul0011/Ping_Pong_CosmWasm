@@ -176,7 +176,7 @@ mod tests {
         let res = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap();
         assert_eq!(0, res.messages.len());
 
-        println!("hoola hoolla");
+        println!("intialised properly");
 
         let res = query(deps.as_ref(), mock_env(), QueryMsg::GetPingCount {}).unwrap();
         let value: GetPingCountResponse = from_binary(&res).unwrap();
@@ -222,7 +222,7 @@ mod tests {
 
         let msg = ExecuteMsg::Ping {};
         let res = execute(deps.as_mut(), mock_env(), info, msg).unwrap();
-        assert_eq!(0, res.attributes.len());
+        assert_eq!(1, res.attributes.len());
         assert_eq!(res.attributes[0].key, "action");
         assert_eq!(res.attributes[0].value, "increment");
 

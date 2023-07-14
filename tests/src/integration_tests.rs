@@ -68,14 +68,20 @@ fn integration_test() {
         None,               // code admin (for migration)
     ).unwrap();
 
-    let _res = router
+    let res = router
     .execute_contract(
         Addr::unchecked("ping owner"),
         ping_contract_addr.clone(),
         &ping::msg::ExecuteMsg::DeployPongContract { pong_code_id },
         &[], // funds
-    );
+    ).unwrap();
 
+
+    let instantiation_event = res.events[res.events.len() - 1].clone();
+    println!("Instantiated code id {} to address {}",
+        instantiation_event.attributes[1].value,
+        instantiation_event.attributes[0].value
+    );
     // let pong_contract_addr = router
     //     .instantiate_contract(
     //         pong_code_id,
